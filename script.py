@@ -24,12 +24,12 @@ class Person:
             payment = Payment(pay_to=payer.name, pay_amount=int(self.lack_of_money))
             payer.lack_of_money = payer.lack_of_money + self.lack_of_money
             self.lack_of_money = 0
-            self.payments.append(payment)
         else:
             payment = Payment(pay_to=payer.name, pay_amount=int(payer.lack_of_money))
             self.lack_of_money = self.lack_of_money + payer.lack_of_money
             payer.lack_of_money = 0
-            self.payments.append(payment)
+
+        self.payments.append(payment)
 
 
 def calculate():
@@ -37,14 +37,14 @@ def calculate():
 
     persons_num = int(q)
     persons = []
-    for person in range(0, persons_num):
+    for _ in range(persons_num):
         ok = False
         while not ok:
             try:
                 person_name = input(f'Input person name\n')
                 spent = input(f'Input moneys spent\n')
                 members = input(f'Input members\n')
-                spent_int = sum([int(i) for i in spent.split(',') if i != ''])
+                spent_int = sum(int(i) for i in spent.split(',') if i != '')
                 members_int = int(members)
                 persons.append(
                     Person(
@@ -56,10 +56,8 @@ def calculate():
                 ok = True
             except ValueError:
                 print(f'Cant parse input {spent}, only numeric value available')
-                pass
-
-    total_spent = sum([person.spent for person in persons])
-    median_spent = total_spent/sum([person.members for person in persons])*-1
+    total_spent = sum(person.spent for person in persons)
+    median_spent = total_spent / sum(person.members for person in persons) * -1
 
     for person in persons:
         person.lack_of_money = person.spent + (median_spent*person.members)
@@ -68,11 +66,9 @@ def calculate():
         try:
             prof_person = next(proficit_person(persons))
             def_person = next(deficit_person(persons))
-            if prof_person is not def_person:
-                prof_person.pay(def_person)
-            else:
+            if prof_person is def_person:
                 def_person = next(deficit_person(persons))
-                prof_person.pay(def_person)
+            prof_person.pay(def_person)
         except StopIteration:
             pass
 
@@ -83,22 +79,20 @@ def deficit_person(persons: [Person]):
     for person in persons:
         if person.lack_of_money > 0:
             yield person
-    else:
-        return None
+    return None
 
 
 def proficit_person(persons: [Person]):
     for person in persons:
         if person.lack_of_money < 0:
             yield person
-    else:
-        return None
+    return None
 
 
 if __name__ == '__main__':
     calculated_persons, median_spent = calculate()
     print('Calculating')
-    print(f'Total spent {sum([person.spent for person in calculated_persons])}')
+    print(f'Total spent {sum(person.spent for person in calculated_persons)}')
     print(f'Median spent {int(median_spent)}')
     print('*'*20)
     for person in calculated_persons:
